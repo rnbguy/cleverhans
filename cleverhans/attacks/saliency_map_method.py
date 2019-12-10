@@ -67,7 +67,7 @@ class SaliencyMapMethod(Attack):
           return result
 
         labels, nb_classes = self.get_or_guess_labels(x, kwargs)
-        self.y_target = tf.py_func(random_targets, [labels],
+        self.y_target = tf.compat.v1.py_func(random_targets, [labels],
                                    self.tf_dtype)
         self.y_target.set_shape([None, nb_classes])
 
@@ -242,8 +242,8 @@ def jsma_symbolic(x, y_target, model, theta, gamma, clip_min, clip_max):
     best = tf.argmax(
         tf.reshape(scores, shape=[-1, nb_features * nb_features]), axis=1)
 
-    p1 = tf.mod(best, nb_features)
-    p2 = tf.floordiv(best, nb_features)
+    p1 = tf.math.mod(best, nb_features)
+    p2 = tf.math.floordiv(best, nb_features)
     p1_one_hot = tf.one_hot(p1, depth=nb_features)
     p2_one_hot = tf.one_hot(p2, depth=nb_features)
 
