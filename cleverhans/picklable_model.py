@@ -16,7 +16,6 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 
-from cleverhans.compat import reduce_mean, reduce_prod
 from cleverhans.model import Model
 from cleverhans.serial import PicklableVariable as PV
 from cleverhans.utils import ordered_union
@@ -558,13 +557,13 @@ class PerImageStandardize(Layer):
 
   def fprop(self, x, **kwargs):
     axis = [1, 2, 3]
-    mean = reduce_mean(x, axis=axis, keepdims=True)
-    variance = reduce_mean(
+    mean = tf.reduce_mean(x, axis=axis, keepdims=True)
+    variance = tf.reduce_mean(
         tf.square(x), axis=axis, keepdims=True) - tf.square(mean)
     variance = tf.nn.relu(variance)
     stddev = tf.sqrt(variance)
 
-    num_pixels = reduce_prod(tf.shape(x)[1:])
+    num_pixels = tf.reduce_prod(tf.shape(x)[1:])
 
     min_stddev = tf.rsqrt(tf.to_float(num_pixels))
     pixel_value_scale = tf.maximum(stddev, min_stddev)

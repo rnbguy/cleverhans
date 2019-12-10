@@ -74,7 +74,7 @@ class Model(object):
     :param x: A symbolic representation (Tensor) of the network input
     :return: A symbolic representation (Tensor) of the predicted label
     """
-    return tf.argmax(self.get_logits(x, **kwargs), axis=1)
+    return tf.argmax(input=self.get_logits(x, **kwargs), axis=1)
 
   def get_probs(self, x, **kwargs):
     """
@@ -85,8 +85,8 @@ class Model(object):
     d = self.fprop(x, **kwargs)
     if self.O_PROBS in d:
       output = d[self.O_PROBS]
-      min_prob = tf.reduce_min(output)
-      max_prob = tf.reduce_max(output)
+      min_prob = tf.reduce_min(input_tensor=output)
+      max_prob = tf.reduce_max(input_tensor=output)
       asserts = [utils_tf.assert_greater_equal(min_prob,
                                                tf.cast(0., min_prob.dtype)),
                  utils_tf.assert_less_equal(max_prob,
@@ -229,8 +229,8 @@ class CallableModelWrapper(Model):
     # as logits accidentally or vice versa
     if self.output_layer == 'probs':
       assert output.op.type == "Softmax"
-      min_prob = tf.reduce_min(output)
-      max_prob = tf.reduce_max(output)
+      min_prob = tf.reduce_min(input_tensor=output)
+      max_prob = tf.reduce_max(input_tensor=output)
       asserts = [utils_tf.assert_greater_equal(min_prob,
                                                tf.cast(0., min_prob.dtype)),
                  utils_tf.assert_less_equal(max_prob,

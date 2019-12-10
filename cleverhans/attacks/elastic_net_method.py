@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 
 from cleverhans.attacks.attack import Attack
-from cleverhans.compat import reduce_sum, reduce_max
 from cleverhans.model import Model, CallableModelWrapper, wrapper_warning_logits
 from cleverhans import utils
 
@@ -300,13 +299,13 @@ class EAD(object):
     self.output_y = model.get_logits(self.slack)
 
     # distance to the input data
-    self.l2dist = reduce_sum(tf.square(self.newimg-self.timg),
+    self.l2dist = tf.reduce_sum(tf.square(self.newimg-self.timg),
                              list(range(1, len(shape))))
-    self.l2dist_y = reduce_sum(tf.square(self.slack-self.timg),
+    self.l2dist_y = tf.reduce_sum(tf.square(self.slack-self.timg),
                                list(range(1, len(shape))))
-    self.l1dist = reduce_sum(tf.abs(self.newimg-self.timg),
+    self.l1dist = tf.reduce_sum(tf.abs(self.newimg-self.timg),
                              list(range(1, len(shape))))
-    self.l1dist_y = reduce_sum(tf.abs(self.slack-self.timg),
+    self.l1dist_y = tf.reduce_sum(tf.abs(self.slack-self.timg),
                                list(range(1, len(shape))))
     self.elasticdist = self.l2dist + tf.multiply(self.l1dist,
                                                  self.beta_t)
@@ -320,11 +319,11 @@ class EAD(object):
       self.crit_p = 'L1'
 
     # compute the probability of the label class versus the maximum other
-    real = reduce_sum((self.tlab) * self.output, 1)
-    real_y = reduce_sum((self.tlab) * self.output_y, 1)
-    other = reduce_max((1 - self.tlab) * self.output -
+    real = tf.reduce_sum((self.tlab) * self.output, 1)
+    real_y = tf.reduce_sum((self.tlab) * self.output_y, 1)
+    other = tf.reduce_max((1 - self.tlab) * self.output -
                        (self.tlab * 10000), 1)
-    other_y = reduce_max((1 - self.tlab) * self.output_y -
+    other_y = tf.reduce_max((1 - self.tlab) * self.output_y -
                          (self.tlab * 10000), 1)
 
     if self.TARGETED:
@@ -337,12 +336,12 @@ class EAD(object):
       loss1_y = tf.maximum(ZERO(), real_y - other_y + self.CONFIDENCE)
 
     # sum up the losses
-    self.loss21 = reduce_sum(self.l1dist)
-    self.loss21_y = reduce_sum(self.l1dist_y)
-    self.loss2 = reduce_sum(self.l2dist)
-    self.loss2_y = reduce_sum(self.l2dist_y)
-    self.loss1 = reduce_sum(self.const * loss1)
-    self.loss1_y = reduce_sum(self.const * loss1_y)
+    self.loss21 = tf.reduce_sum(self.l1dist)
+    self.loss21_y = tf.reduce_sum(self.l1dist_y)
+    self.loss2 = tf.reduce_sum(self.l2dist)
+    self.loss2_y = tf.reduce_sum(self.l2dist_y)
+    self.loss1 = tf.reduce_sum(self.const * loss1)
+    self.loss1_y = tf.reduce_sum(self.const * loss1_y)
     self.loss_opt = self.loss1_y + self.loss2_y
     self.loss = self.loss1+self.loss2+tf.multiply(self.beta_t, self.loss21)
 

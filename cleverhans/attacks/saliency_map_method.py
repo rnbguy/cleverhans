@@ -8,7 +8,6 @@ from six.moves import xrange
 import tensorflow as tf
 
 from cleverhans.attacks.attack import Attack
-from cleverhans.compat import reduce_sum, reduce_max, reduce_any
 
 tf_dtype = tf.as_dtype('float32')
 
@@ -208,8 +207,8 @@ def jsma_symbolic(x, y_target, model, theta, gamma, clip_min, clip_max):
         tf.transpose(y_in, perm=[1, 0]), shape=[nb_classes, -1, 1])
     other_classes = tf.cast(tf.not_equal(target_class, 1), tf_dtype)
 
-    grads_target = reduce_sum(grads * target_class, axis=0)
-    grads_other = reduce_sum(grads * other_classes, axis=0)
+    grads_target = tf.reduce_sum(grads * target_class, axis=0)
+    grads_other = tf.reduce_sum(grads * other_classes, axis=0)
 
     # Remove the already-used input features from the search space
     # Subtract 2 times the maximum value from those value so that
@@ -219,13 +218,13 @@ def jsma_symbolic(x, y_target, model, theta, gamma, clip_min, clip_max):
 
     target_tmp = grads_target
     target_tmp -= increase_coef \
-        * reduce_max(tf.abs(grads_target), axis=1, keepdims=True)
+        * tf.reduce_max(tf.abs(grads_target), axis=1, keepdims=True)
     target_sum = tf.reshape(target_tmp, shape=[-1, nb_features, 1]) \
         + tf.reshape(target_tmp, shape=[-1, 1, nb_features])
 
     other_tmp = grads_other
     other_tmp += increase_coef \
-        * reduce_max(tf.abs(grads_other), axis=1, keepdims=True)
+        * tf.reduce_max(tf.abs(grads_other), axis=1, keepdims=True)
     other_sum = tf.reshape(other_tmp, shape=[-1, nb_features, 1]) \
         + tf.reshape(other_tmp, shape=[-1, 1, nb_features])
 
@@ -249,8 +248,8 @@ def jsma_symbolic(x, y_target, model, theta, gamma, clip_min, clip_max):
     p2_one_hot = tf.one_hot(p2, depth=nb_features)
 
     # Check if more modification is needed for each sample
-    mod_not_done = tf.equal(reduce_sum(y_in * preds_onehot, axis=1), 0)
-    cond = mod_not_done & (reduce_sum(domain_in, axis=1) >= 2)
+    mod_not_done = tf.equal(tf.reduce_sum(y_in * preds_onehot, axis=1), 0)
+    cond = mod_not_done & (tf.reduce_sum(domain_in, axis=1) >= 2)
 
     # Update the search domain
     cond_float = tf.reshape(tf.cast(cond, tf_dtype), shape=[-1, 1])
@@ -268,7 +267,7 @@ def jsma_symbolic(x, y_target, model, theta, gamma, clip_min, clip_max):
 
     # Increase the iterator, and check if all misclassifications are done
     i_out = tf.add(i_in, 1)
-    cond_out = reduce_any(cond)
+    cond_out = tf.reduce_any(cond)
 
     return x_out, y_in, domain_out, i_out, cond_out
 

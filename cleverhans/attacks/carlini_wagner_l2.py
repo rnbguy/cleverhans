@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 
 from cleverhans.attacks.attack import Attack
-from cleverhans.compat import reduce_sum, reduce_max
 from cleverhans.model import CallableModelWrapper, Model, wrapper_warning_logits
 from cleverhans import utils
 
@@ -238,12 +237,12 @@ class CWL2(object):
     # distance to the input data
     self.other = (tf.tanh(self.timg) + 1) / \
         2 * (clip_max - clip_min) + clip_min
-    self.l2dist = reduce_sum(
+    self.l2dist = tf.reduce_sum(
         tf.square(self.newimg - self.other), list(range(1, len(shape))))
 
     # compute the probability of the label class versus the maximum other
-    real = reduce_sum((self.tlab) * self.output, 1)
-    other = reduce_max((1 - self.tlab) * self.output - self.tlab * 10000,
+    real = tf.reduce_sum((self.tlab) * self.output, 1)
+    other = tf.reduce_max((1 - self.tlab) * self.output - self.tlab * 10000,
                        1)
 
     if self.TARGETED:
@@ -254,8 +253,8 @@ class CWL2(object):
       loss1 = tf.maximum(ZERO(), real - other + self.CONFIDENCE)
 
     # sum up the losses
-    self.loss2 = reduce_sum(self.l2dist)
-    self.loss1 = reduce_sum(self.const * loss1)
+    self.loss2 = tf.reduce_sum(self.l2dist)
+    self.loss1 = tf.reduce_sum(self.const * loss1)
     self.loss = self.loss1 + self.loss2
 
     # Setup the adam optimizer and keep track of variables we're creating

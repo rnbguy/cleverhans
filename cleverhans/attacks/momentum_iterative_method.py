@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from cleverhans.attacks.attack import Attack
 from cleverhans.attacks.fast_gradient_method import optimize_linear
-from cleverhans.compat import reduce_sum, reduce_mean, softmax_cross_entropy_with_logits
+from cleverhans.compat import softmax_cross_entropy_with_logits
 from cleverhans import utils_tf
 
 
@@ -69,7 +69,7 @@ class MomentumIterativeMethod(Attack):
 
     # Fix labels to the first model predictions for loss computation
     y, _nb_classes = self.get_or_guess_labels(x, kwargs)
-    y = y / reduce_sum(y, 1, keepdims=True)
+    y = y / tf.reduce_sum(y, 1, keepdims=True)
     targeted = (self.y_target is not None)
 
     def cond(i, _, __):
@@ -91,7 +91,7 @@ class MomentumIterativeMethod(Attack):
       avoid_zero_div = tf.cast(1e-12, grad.dtype)
       grad = grad / tf.maximum(
           avoid_zero_div,
-          reduce_mean(tf.abs(grad), red_ind, keepdims=True))
+          tf.reduce_mean(tf.abs(grad), red_ind, keepdims=True))
       m = self.decay_factor * m + grad
 
       optimal_perturbation = optimize_linear(m, self.eps_iter, self.ord)

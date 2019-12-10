@@ -8,7 +8,6 @@ import numpy as np
 import tensorflow as tf
 
 from cleverhans.attacks.attack import Attack
-from cleverhans.compat import reduce_sum
 from cleverhans.model import Model
 from cleverhans.utils_tf import clip_eta
 
@@ -105,7 +104,7 @@ class FastFeatureAdversaries(Attack):
 
     # Compute loss
     # This is a targeted attack, hence the negative sign
-    loss = -reduce_sum(tf.square(a_feat - g_feat), axis)
+    loss = -tf.reduce_sum(tf.square(a_feat - g_feat), axis)
 
     # Define gradient of loss wrt input
     grad, = tf.gradients(loss, adv_x)

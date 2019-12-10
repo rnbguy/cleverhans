@@ -9,7 +9,6 @@ import warnings
 import numpy as np
 import tensorflow as tf
 
-from cleverhans.compat import reduce_max
 from cleverhans.model import Model
 from cleverhans import utils
 
@@ -276,7 +275,7 @@ class Attack(object):
       labels = kwargs['y_target']
     else:
       preds = self.model.get_probs(x)
-      preds_max = reduce_max(preds, 1, keepdims=True)
+      preds_max = tf.reduce_max(preds, 1, keepdims=True)
       original_predictions = tf.to_float(tf.equal(preds, preds_max))
       labels = tf.stop_gradient(original_predictions)
       del preds

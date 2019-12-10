@@ -8,7 +8,6 @@ from six.moves import xrange
 import tensorflow as tf
 
 from cleverhans.attacks.attack import Attack
-from cleverhans.compat import reduce_mean, reduce_sum, reduce_max
 from cleverhans.model import Model
 from cleverhans import utils_tf
 
@@ -266,7 +265,7 @@ class TensorOptimizer(object):
     assert len(x) == 1 and isinstance(x, list), \
         'x should be a list and contain only one image tensor'
     x = x[0]
-    loss = reduce_mean(loss_fn(x), axis=0)
+    loss = tf.reduce_mean(loss_fn(x), axis=0)
     return tf.gradients(loss, x)
 
   def _apply_gradients(self, grads, x, optim_state):
@@ -421,7 +420,7 @@ class SPSAAdam(TensorAdam):
       loss_vals = tf.reshape(
           loss_fn(x + delta_x),
           [2 * self._num_samples] + [1] * (len(x_shape) - 1))
-      avg_grad = reduce_mean(loss_vals * delta_x, axis=0) / delta
+      avg_grad = tf.reduce_mean(loss_vals * delta_x, axis=0) / delta
       avg_grad = tf.expand_dims(avg_grad, axis=0)
       new_grad_array = grad_array.write(i, avg_grad)
       return i + 1, new_grad_array
@@ -437,7 +436,7 @@ class SPSAAdam(TensorAdam):
         ],
         back_prop=False,
         parallel_iterations=1)
-    avg_grad = reduce_sum(all_grads.stack(), axis=0)
+    avg_grad = tf.reduce_sum(all_grads.stack(), axis=0)
     return [avg_grad]
 
 
@@ -460,14 +459,14 @@ def margin_logit_loss(model_logits, label, nb_classes=10, num_classes=None):
   if 'int' in str(logit_mask.dtype):
     logit_mask = tf.to_float(logit_mask)
   try:
-    label_logits = reduce_sum(logit_mask * model_logits, axis=-1)
+    label_logits = tf.reduce_sum(logit_mask * model_logits, axis=-1)
   except TypeError:
     raise TypeError("Could not take row-wise dot product between "
                     "logit mask, of dtype " + str(logit_mask.dtype)
                     + " and model_logits, of dtype "
                     + str(model_logits.dtype))
   logits_with_target_label_neg_inf = model_logits - logit_mask * 99999
-  highest_nonlabel_logits = reduce_max(
+  highest_nonlabel_logits = tf.reduce_max(
       logits_with_target_label_neg_inf, axis=-1)
   loss = highest_nonlabel_logits - label_logits
   return loss
@@ -531,11 +530,11 @@ def spm(x, model, y=None, n_samples=None, dx_min=-0.1,
   if y is None:
     preds = model.get_probs(x)
     # Using model predictions as ground truth to avoid label leaking
-    preds_max = reduce_max(preds, 1, keepdims=True)
+    preds_max = tf.reduce_max(preds, axis=1, keepdims=True)
     y = tf.to_float(tf.equal(preds, preds_max))
     y = tf.stop_gradient(y)
     del preds
-  y = y / reduce_sum(y, 1, keepdims=True)
+  y = y / tf.reduce_sum(y, axis=1, keepdims=True)
 
   # Define the range of transformations
   dxs = np.linspace(dx_min, dx_max, n_dxs)
@@ -702,7 +701,7 @@ def projected_optimization(loss_fn,
     if compute_loss:
       # NOTE: this step is not actually redundant with the optimizer step.
       # SPSA calculates the loss at randomly perturbed points but doesn't calculate the loss at the current point.
-      loss = reduce_mean(wrapped_loss_fn(projected_perturbation), axis=0)
+      loss = tf.reduce_mean(wrapped_loss_fn(projected_perturbation), axis=0)
 
       if is_debug:
         with tf.device("/cpu:0"):

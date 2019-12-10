@@ -5,7 +5,7 @@ import numpy as np
 import tensorflow as tf
 
 from cleverhans.attacks.attack import Attack
-from cleverhans.compat import reduce_sum, softmax_cross_entropy_with_logits
+from cleverhans.compat import softmax_cross_entropy_with_logits
 from cleverhans.model import CallableModelWrapper, Model, wrapper_warning
 from cleverhans import utils
 from cleverhans import utils_tf
@@ -153,14 +153,14 @@ class LBFGS_impl(object):
 
     self.score = softmax_cross_entropy_with_logits(
         labels=self.targeted_label, logits=self.logits)
-    self.l2dist = reduce_sum(tf.square(self.x - self.ori_img))
+    self.l2dist = tf.reduce_sum(tf.square(self.x - self.ori_img))
     # small self.const will result small adversarial perturbation
     # targeted attack aims at minimize loss against target label
     # untargeted attack aims at maximize loss against True label
     if self.targeted_attack:
-      self.loss = reduce_sum(self.score * self.const) + self.l2dist
+      self.loss = tf.reduce_sum(self.score * self.const) + self.l2dist
     else:
-      self.loss = -reduce_sum(self.score * self.const) + self.l2dist
+      self.loss = -tf.reduce_sum(self.score * self.const) + self.l2dist
     self.grad, = tf.gradients(self.loss, self.x)
 
   def attack(self, x_val, targets):

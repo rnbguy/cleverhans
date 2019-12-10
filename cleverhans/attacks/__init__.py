@@ -31,8 +31,6 @@ from cleverhans.attacks.hop_skip_jump_attack import HopSkipJumpAttack, BoundaryA
 from cleverhans.attacks.sparse_l1_descent import SparseL1Descent
 from cleverhans.model import Model, CallableModelWrapper
 from cleverhans.model import wrapper_warning, wrapper_warning_logits
-from cleverhans.compat import reduce_sum, reduce_mean
-from cleverhans.compat import reduce_max
 from cleverhans.compat import softmax_cross_entropy_with_logits
 from cleverhans.utils_tf import clip_eta
 from cleverhans import utils_tf

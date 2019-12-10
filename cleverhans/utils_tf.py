@@ -16,8 +16,6 @@ from six.moves import xrange
 import tensorflow as tf
 
 from cleverhans.compat import device_lib
-from cleverhans.compat import reduce_sum, reduce_mean
-from cleverhans.compat import reduce_max
 from cleverhans.compat import softmax_cross_entropy_with_logits
 from cleverhans.utils import batch_indices, _ArgsWrapper, create_logger
 
@@ -46,7 +44,7 @@ def model_loss(y, model, mean=True):
   out = softmax_cross_entropy_with_logits(logits=logits, labels=y)
 
   if mean:
-    out = reduce_mean(out)
+    out = tf.reduce_mean(out)
   return out
 
 
@@ -334,8 +332,8 @@ def l2_batch_normalize(x, epsilon=1e-12, scope=None):
   with tf.name_scope(scope, "l2_batch_normalize") as name_scope:
     x_shape = tf.shape(x)
     x = tf.contrib.layers.flatten(x)
-    x /= (epsilon + reduce_max(tf.abs(x), 1, keepdims=True))
-    square_sum = reduce_sum(tf.square(x), 1, keepdims=True)
+    x /= (epsilon + tf.reduce_max(tf.abs(x), 1, keepdims=True))
+    square_sum = tf.reduce_sum(tf.square(x), 1, keepdims=True)
     x_inv_norm = tf.rsqrt(np.sqrt(epsilon) + square_sum)
     x_norm = tf.multiply(x, x_inv_norm)
     return tf.reshape(x_norm, x_shape, name_scope)
@@ -349,7 +347,7 @@ def kl_with_logits(p_logits, q_logits, scope=None,
     p = tf.nn.softmax(p_logits)
     p_log = tf.nn.log_softmax(p_logits)
     q_log = tf.nn.log_softmax(q_logits)
-    loss = reduce_mean(reduce_sum(p * (p_log - q_log), axis=1),
+    loss = tf.reduce_mean(tf.reduce_sum(p * (p_log - q_log), axis=1),
                        name=name)
     tf.losses.add_loss(loss, loss_collection)
     return loss
@@ -407,7 +405,7 @@ def clip_eta(eta, ord, eps):
     # avoid_zero_div must go inside sqrt to avoid a divide by zero
     # in the gradient through this operation
     norm = tf.sqrt(tf.maximum(avoid_zero_div,
-                              reduce_sum(tf.square(eta),
+                              tf.reduce_sum(tf.square(eta),
                                          reduc_ind,
                                          keepdims=True)))
     # We must *clip* to within the norm ball, not *normalize* onto the

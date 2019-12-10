@@ -10,8 +10,7 @@ import tensorflow as tf
 from cleverhans.attacks.attack import Attack
 from cleverhans import utils_tf
 from cleverhans.utils_tf import clip_eta, random_lp_vector
-from cleverhans.compat import reduce_max, reduce_sum, \
-  softmax_cross_entropy_with_logits
+from cleverhans.compat import softmax_cross_entropy_with_logits
 
 
 class SparseL1Descent(Attack):
@@ -289,10 +288,10 @@ def sparse_l1_descent(x,
 
   if y is None:
     # Using model predictions as ground truth to avoid label leaking
-    preds_max = reduce_max(logits, 1, keepdims=True)
+    preds_max = tf.reduce_max(logits, 1, keepdims=True)
     y = tf.to_float(tf.equal(logits, preds_max))
     y = tf.stop_gradient(y)
-  y = y / reduce_sum(y, 1, keepdims=True)
+  y = y / tf.reduce_sum(y, 1, keepdims=True)
 
   # Compute loss
   loss = softmax_cross_entropy_with_logits(labels=y, logits=logits)
