@@ -126,12 +126,12 @@ class Model(object):
       pass
 
     # For graph-based execution
-    scope_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+    scope_vars = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
                                    self.scope + "/")
 
     if len(scope_vars) == 0:
       self.make_params()
-      scope_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES,
+      scope_vars = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TRAINABLE_VARIABLES,
                                      self.scope + "/")
       assert len(scope_vars) > 0
 
