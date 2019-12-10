@@ -92,7 +92,7 @@ class SparseL1Descent(Attack):
     else:
       model_preds = self.model.get_probs(x)
       preds_max = tf.reduce_max(model_preds, 1, keepdims=True)
-      y = tf.to_float(tf.equal(model_preds, preds_max))
+      y = tf.cast(tf.equal(model_preds, preds_max), dtype=tf.float32)
       y = tf.stop_gradient(y)
       targeted = False
       del model_preds
@@ -289,7 +289,7 @@ def sparse_l1_descent(x,
   if y is None:
     # Using model predictions as ground truth to avoid label leaking
     preds_max = tf.reduce_max(logits, 1, keepdims=True)
-    y = tf.to_float(tf.equal(logits, preds_max))
+    y = tf.cast(tf.equal(logits, preds_max), dtype=tf.float32)
     y = tf.stop_gradient(y)
   y = y / tf.reduce_sum(y, 1, keepdims=True)
 
