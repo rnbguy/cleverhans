@@ -177,7 +177,7 @@ def fgm(x,
   if y is None:
     # Using model predictions as ground truth to avoid label leaking
     preds_max = tf.reduce_max(logits, 1, keepdims=True)
-    y = tf.to_float(tf.equal(logits, preds_max))
+    y = tf.cast(tf.equal(logits, preds_max), dtype=tf.float32)
     y = tf.stop_gradient(y)
   y = y / tf.reduce_sum(y, 1, keepdims=True)
 
@@ -240,7 +240,7 @@ def optimize_linear(grad, eps, ord=np.inf):
     abs_grad = tf.abs(grad)
     sign = tf.sign(grad)
     max_abs_grad = tf.reduce_max(abs_grad, red_ind, keepdims=True)
-    tied_for_max = tf.to_float(tf.equal(abs_grad, max_abs_grad))
+    tied_for_max = tf.cast(tf.equal(abs_grad, max_abs_grad), dtype=tf.float32)
     num_ties = tf.reduce_sum(tied_for_max, red_ind, keepdims=True)
     optimal_perturbation = sign * tied_for_max / num_ties
   elif ord == 2:
