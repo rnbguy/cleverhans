@@ -32,27 +32,6 @@ reduce_mean = _wrap(tf.reduce_mean)
 reduce_prod = _wrap(tf.reduce_prod)
 reduce_any = _wrap(tf.reduce_any)
 
-def reduce_function(op_func, input_tensor, axis=None, keepdims=None,
-                    name=None, reduction_indices=None):
-  """
-  This function used to be needed to support tf 1.4 and early, but support for tf 1.4 and earlier is now dropped.
-  :param op_func: expects the function to handle eg: tf.reduce_sum.
-  :param input_tensor: The tensor to reduce. Should have numeric type.
-  :param axis: The dimensions to reduce. If None (the default),
-          reduces all dimensions. Must be in the range
-          [-rank(input_tensor), rank(input_tensor)).
-  :param keepdims: If true, retains reduced dimensions with length 1.
-  :param name: A name for the operation (optional).
-  :param reduction_indices: The old (deprecated) name for axis.
-  :return: outputs same value as op_func.
-  """
-
-  warnings.warn("`reduce_function` is deprecated and may be removed on or after 2019-09-08.")
-
-  out = op_func(input_tensor, axis=axis, keepdims=keepdims, name=name, reduction_indices=reduction_indices)
-
-  return out
-
 def softmax_cross_entropy_with_logits(sentinel=None,
                                       labels=None,
                                       logits=None,
@@ -71,7 +50,7 @@ def softmax_cross_entropy_with_logits(sentinel=None,
     raise ValueError("Both labels and logits must be provided.")
 
   try:
-    f = tf.nn.softmax_cross_entropy_with_logits_v2
+    f = tf.compat.v1.nn.softmax_cross_entropy_with_logits_v2
   except AttributeError:
     raise RuntimeError("This version of TensorFlow is no longer supported. See cleverhans/README.md")
 
