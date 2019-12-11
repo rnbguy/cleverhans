@@ -45,10 +45,6 @@ class Attack(object):
     if sess is not None and not isinstance(sess, tf.compat.v1.Session):
       raise TypeError("sess is not an instance of tf.Session")
 
-    from cleverhans import attacks_tf
-    attacks_tf.np_dtype = self.np_dtype
-    attacks_tf.tf_dtype = self.tf_dtype
-
     if not isinstance(model, Model):
       raise TypeError("The model argument should be an instance of"
                       " the cleverhans.model.Model class.")

@@ -472,7 +472,7 @@ def random_lp_vector(shape, ord, eps, dtype=tf.float32, seed=None):
     raise ValueError('ord must be np.inf, 1, or 2.')
 
   if ord == np.inf:
-    r = tf.random_uniform(shape, -eps, eps, dtype=dtype, seed=seed)
+    r = tf.random.uniform(shape, -eps, eps, dtype=dtype, seed=seed)
   else:
 
     # For ord=1 and ord=2, we use the generic technique from
